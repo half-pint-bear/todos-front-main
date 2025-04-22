@@ -1,11 +1,11 @@
 //Init
 welcomeUser();
 
-fetchAll();
+handleData();
 
 /**
  * Add user name in fixed navbar
- * @params null
+ * @param null
  */
 function welcomeUser() {
     const container = document.getElementsByClassName('container');
@@ -18,8 +18,8 @@ function welcomeUser() {
 
 /**
  * Fetch list items
- * @params null
- * @returns JSON array if successful
+ * @param null
+ * @return JSON array if successful
  */
 async function fetchAll() {
     let res = await fetch('http://127.0.0.1:3000/todos', {
@@ -35,3 +35,15 @@ async function fetchAll() {
         return json[0]["todolist"];
     }
 }
+
+/**
+ * Manage data from promise
+ * @param null
+ */
+async function handleData() {
+    let allTasks = await fetchAll().then( data => {return data});
+    console.log(allTasks);
+    const taskRenderer = new TaskRenderer("app");
+    taskRenderer.renderTasks(allTasks);
+}
+
