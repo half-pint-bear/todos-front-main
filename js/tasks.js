@@ -3,6 +3,8 @@ welcomeUser();
 
 handleData();
 
+
+
 /**
  * Add user name in fixed navbar
  * @param null
@@ -42,7 +44,7 @@ async function fetchAll() {
  */
 async function handleData() {
     let allTasks = await fetchAll().then( data => {return data});
-    console.log(allTasks);
+    //console.log(allTasks);
     const taskRenderer = new TaskRenderer("app");
     taskRenderer.renderTasks(allTasks);
 }

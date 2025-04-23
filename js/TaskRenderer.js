@@ -21,6 +21,8 @@ class TaskRenderer {
             const tile = this.createTile(task);
             this.container.appendChild(tile);
         });
+
+        this.bindEvents();
     }
 
     //DOM Manipulation
@@ -33,9 +35,22 @@ class TaskRenderer {
             <h3>Tâche #${task.id}</h3>
             <p>${this.escapeHTML(task.text)}</p>
             <p><strong>Statut :</strong> ${task.is_complete ? 'Terminée' : 'À faire'}</p>
+            <button class="btn btn-primary" data-id=${task.id}>Voir plus</button>
         `;
 
         return tile;
+    }
+
+    bindEvents() {
+        const showMoreButtons = document.querySelectorAll('.btn-primary');
+
+        showMoreButtons.forEach( function(btn) {
+            btn.addEventListener('click', () => {
+                const taskId = btn.dataset.id;
+                if(taskId)
+                    window.location.href= `./item.html?id=${taskId}`;
+            })
+        })
     }
 
     //Prevents HTML injections
