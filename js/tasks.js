@@ -5,8 +5,7 @@ init();
  * @param null
  */
 async function init() {
-    const taskRenderer = new TaskRenderer("app");
-    taskRenderer.welcomeUser();
+    const taskRenderer = new TaskRenderer();
     let allTasks = await taskRenderer.handleAllTasks();
     taskRenderer.renderTasks(allTasks);
 }

@@ -1,22 +1,37 @@
 class TaskRenderer {
 
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-
-        if(!this.container)
-            throw new Error('Aucun élément correspondant à ${containerId}');
+    constructor() {
+        this.appDiv = document.getElementById("app");
+        this.containerDiv = document.getElementsByClassName("container");
+        this.welcomeUser();
+        this.setAddTaskBtn();
     }
 
     //Display user name after login
     welcomeUser() {
-        const container = document.getElementsByClassName('container');
         const userGreetings = document.createElement("h6");
-        
         userGreetings.innerText = "Bonjour et bienvenue " + localStorage.getItem("username");
         userGreetings.style.color = "#FFF";
-        container[0].appendChild(userGreetings);
+
+        this.containerDiv[0].appendChild(userGreetings);
     }
 
+    setAddTaskBtn() {
+        const addTaskBtn = document.createElement("button");
+        addTaskBtn.innerText = "Ajouter une tâche";
+        addTaskBtn.className = "btn btn-primary";
+        
+        const taskForm = this.loadTaskFormModal();
+        addTaskBtn.addEventListener('click', () => {
+            taskForm.style.display = 'block';
+        })
+        this.containerDiv[2].insertBefore(addTaskBtn, this.appDiv);
+    }
+    
+    /**
+     * API call
+     * @returns json
+     */
     async fetchAll() {
         let res = await fetch('http://127.0.0.1:3000/todos', {
             headers: {
@@ -32,29 +47,38 @@ class TaskRenderer {
         }
     }
 
+    /**
+     * Resolving promise
+     * @returns json
+     */
     async handleAllTasks() {
         return this.fetchAll().then(data => {return data});
     }
 
     //Display element in DOM
     renderTasks(tasks) {
-        this.container.innerHTML = '';
+        this.appDiv.innerHTML = '';
 
         //Check if tasklist is empty
         if(!tasks || (!Array.isArray(tasks) && tasks.length === 0)) {
-            this.container.innerHTML = '<p>Aucune tâche à afficher.</p>';
+            this.appDiv.innerHTML = '<p>Aucune tâche à afficher.</p>';
             return;
         }
 
         //Check type of tasks in order to know if > 1
+        /**
+         * TODO
+         * Remove singleTask controls and methods
+         * This will be separately managed in future item object
+         */
         if(Array.isArray(tasks)) {
             tasks.forEach( task => {
                 const tile = this.loadTile(task);
-                this.container.appendChild(tile);
+                this.appDiv.appendChild(tile);
             });
         } else if(typeof tasks === 'object') {
             const singleTask = this.loadSingleTask(tasks);
-            this.container.appendChild(singleTask);
+            this.appDiv.appendChild(singleTask);
         }
 
         this.bindShowMoreBtnEvent();
@@ -89,6 +113,29 @@ class TaskRenderer {
         `;
 
         return tile;
+    }
+
+    loadTaskFormModal() {
+        const taskForm = document.createElement("div");
+        taskForm.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>Modal Header</h2>
+                </div>
+                <div class="modal-body">
+                <p>Some text in the Modal Body</p>
+                <p>Some other text...</p>
+                </div>
+                <div class="modal-footer">
+                <h3>Modal Footer</h3>
+                </div>
+            </div>
+        `;
+        taskForm.style.display = "none";
+        this.containerDiv[2].insertBefore(taskForm, this.appDiv);
+
+        return taskForm;
     }
     
     //Item ID page redirection
