@@ -7,6 +7,35 @@ class TaskRenderer {
             throw new Error('Aucun élément correspondant à ${containerId}');
     }
 
+    //Display user name after login
+    welcomeUser() {
+        const container = document.getElementsByClassName('container');
+        const userGreetings = document.createElement("h6");
+        
+        userGreetings.innerText = "Bonjour et bienvenue " + localStorage.getItem("username");
+        userGreetings.style.color = "#FFF";
+        container[0].appendChild(userGreetings);
+    }
+
+    async fetchAll() {
+        let res = await fetch('http://127.0.0.1:3000/todos', {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'GET'
+        });
+    
+        if(res.ok) {
+            let json = await res.json();
+            return json[0]["todolist"];
+        }
+    }
+
+    async handleAllTasks() {
+        return this.fetchAll().then(data => {return data});
+    }
+
     //Display element in DOM
     renderTasks(tasks) {
         this.container.innerHTML = '';
@@ -17,6 +46,7 @@ class TaskRenderer {
             return;
         }
 
+        //Check type of tasks in order to know if > 1
         if(Array.isArray(tasks)) {
             tasks.forEach( task => {
                 const tile = this.loadTile(task);
