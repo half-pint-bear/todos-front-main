@@ -24,6 +24,9 @@ class TaskRenderer {
         const taskForm = this.loadTaskFormModal();
         addTaskBtn.addEventListener('click', () => {
             taskForm.style.display = 'block';
+            document.getElementById('close').addEventListener('click', () => {
+                taskForm.style.display = 'none';
+            })
         })
         this.containerDiv[2].insertBefore(addTaskBtn, this.appDiv);
     }
@@ -120,8 +123,8 @@ class TaskRenderer {
         taskForm.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                <span class="close">&times;</span>
                 <h2>Modal Header</h2>
+                <span id="close">&times;</span>
                 </div>
                 <div class="modal-body">
                 <p>Some text in the Modal Body</p>
