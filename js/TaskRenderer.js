@@ -12,21 +12,26 @@ class TaskRenderer {
         this.container.innerHTML = '';
 
         //Check if tasklist is empty
-        if(!Array.isArray(tasks) || tasks.length === 0) {
+        if(!tasks || (!Array.isArray(tasks) && tasks.length === 0)) {
             this.container.innerHTML = '<p>Aucune tâche à afficher.</p>';
             return;
         }
 
-        tasks.forEach( task => {
-            const tile = this.createTile(task);
-            this.container.appendChild(tile);
-        });
+        if(Array.isArray(tasks)) {
+            tasks.forEach( task => {
+                const tile = this.loadTile(task);
+                this.container.appendChild(tile);
+            });
+        } else if(typeof tasks === 'object') {
+            const singleTask = this.loadSingleTask(tasks);
+            this.container.appendChild(singleTask);
+        }
 
-        this.bindEvents();
+        this.bindShowMoreBtnEvent();
     }
 
     //DOM Manipulation
-    createTile(task) {
+    loadTile(task) {
         const tile = document.createElement('div');
         tile.className = 'task-tile col-lg-3';
         tile.setAttribute('task-id', task.id);
@@ -41,14 +46,33 @@ class TaskRenderer {
         return tile;
     }
 
-    bindEvents() {
+    loadSingleTask(task) {
+        const tile = document.createElement('div');
+        tile.className = 'task-tile col-lg-6';
+        tile.setAttribute('task-id', task.id);
+
+        tile.innerHTML = `
+            <h3>Tâche #${task.id}</h3>
+            <p>${this.escapeHTML(task.text)}</p>
+            <p><strong>Statut :</strong> ${task.is_complete ? 'Terminée' : 'À faire'}</p>
+            <h1 class="btn btn-primary">Pas de bouton, t'as vu frérot ?</h1>
+        `;
+
+        return tile;
+    }
+    
+    //Item ID page redirection
+    bindShowMoreBtnEvent() {
         const showMoreButtons = document.querySelectorAll('.btn-primary');
 
         showMoreButtons.forEach( function(btn) {
             btn.addEventListener('click', () => {
+                //JS inner Object element.dataset : access to all HTML "data-" attributes (l.38 => button data-id)
                 const taskId = btn.dataset.id;
-                if(taskId)
+                if(taskId) {
+                    //Pass taskID through to url
                     window.location.href= `./item.html?id=${taskId}`;
+                }
             })
         })
     }
