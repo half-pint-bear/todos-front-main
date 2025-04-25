@@ -6,20 +6,26 @@ const containerDiv = document.getElementsByClassName("container");
 init();
 
 /**
- * Load page
- * @param null
- * @returns void
+ * Launch
+ * @returns {Promise<void>}
  */
 async function init() {
     let allTasks = await handleAllTasks();
     renderTasks(allTasks);
+    welcomeUser();
 }
 
-/** 
-* API call
-* @param null
-* @returns {JSON}
-*/
+function welcomeUser() {
+    const userGreetings = document.createElement("h6");
+    userGreetings.innerText = "Bonjour et bienvenue " + localStorage.getItem("username");
+    userGreetings.style.color = "#FFF";
+
+    containerDiv[0].appendChild(userGreetings);
+}
+/**
+ * Call API root endpoint
+ * @returns {Promise<*>}
+ */
 async function fetchAll() {
    let res = await fetch(rootUrl, {
        headers: {
@@ -36,17 +42,16 @@ async function fetchAll() {
 }
 
 /**
- * @param null
- * @returns {JSON}
+ * Handle promise data
+ * @returns {Promise<*>}
  */
 async function handleAllTasks() {
    return fetchAll().then(data => {return data});
 }
 
 /**
- * Display element in DOM
- * @param Array tasks
- * @returns void
+ * Build HTML and assign events
+ * @param tasks Array
  */
 function renderTasks(tasks) {
    appDiv.innerHTML = '';
@@ -62,7 +67,7 @@ function renderTasks(tasks) {
            const tile = this.loadTile(task);
            appDiv.appendChild(tile);
        });
-   } 
+   }
 
    bindShowMoreBtnEvent();
    loadAddTaskBtn();
@@ -71,7 +76,7 @@ function renderTasks(tasks) {
 
 /**
  * Prepare HTML task elements
- * @param Array task 
+ * @param task Array
  * @returns {HTMLDivElement}
  */
 function loadTile(task) {
@@ -91,9 +96,10 @@ function loadTile(task) {
 }
 
 /**
- * Item ID page redirection
- * @param null
- * @returns 
+ * Add button to task-tile elements
+ * Assign task.id to each button
+ * Relocates on tasks/{id} endpoint
+ * @returns void
  */
 function bindShowMoreBtnEvent() {
     const showMoreButtons = document.querySelectorAll('.btn-primary');
@@ -110,11 +116,15 @@ function bindShowMoreBtnEvent() {
     })
 }
 
+/**
+ * Add button element in DOM for task put method anticipation
+ * @returns void
+ */
 function loadAddTaskBtn() {
     const addTaskBtn = document.createElement("button");
     addTaskBtn.innerText = "Ajouter une tâche";
     addTaskBtn.className = "btn btn-primary";
-    
+
     containerDiv[2].insertBefore(addTaskBtn, appDiv);
 
     addTaskBtn.addEventListener('click', () => {
@@ -124,6 +134,11 @@ function loadAddTaskBtn() {
     })
 }
 
+/**
+ * Create modal body
+ * @param element  = form to be inserted
+ * @returns {HTMLDivElement}
+ */
 function loadModal(element) {
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -150,6 +165,10 @@ function loadModal(element) {
     return modal;
 }
 
+/**
+ * Create form
+ * @returns {HTMLFormElement}
+ */
 function loadTaskForm() {
     //Form elements creation
     const form = document.createElement("form");
@@ -171,7 +190,7 @@ function loadTaskForm() {
 
     //Compiling form
     form.append(labelName, inputName, submitBtn);
-    
+
     //Preparing auto post vars
     let taskCount = document.getElementsByClassName('task-tile').length;
 
@@ -184,7 +203,12 @@ function loadTaskForm() {
     return form;
 }
 
-//Post JSON data through to API
+/**
+ * Post JSON data through to API
+ * @param taskCount
+ * @param inputName
+ * @returns {Promise<void>}
+ */
 async function postTask(taskCount, inputName) {
     const postDate = new Date();
 
@@ -193,7 +217,7 @@ async function postTask(taskCount, inputName) {
         text: inputName,
         created_at: postDate,
         Tags: [
-            "Test", 
+            "Test",
             "Post"
         ],
         is_complete: false
@@ -217,7 +241,11 @@ async function postTask(taskCount, inputName) {
 
 }
 
-//Prevents HTML injections
+/**
+ * Prevents HTML injections
+ * @param str
+ * @returns {string}
+ */
 function escapeHTML(str) {
     return String(str)
         .replace(/&/g, '&amp;')
