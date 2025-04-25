@@ -1,9 +1,10 @@
 class TaskRenderer {
 
     constructor() {
+        this.rootUrl = "http://127.0.0.1:3000/todos";
         this.appDiv = document.getElementById("app");
         this.containerDiv = document.getElementsByClassName("container");
-        this.welcomeUser();
+        //this.welcomeUser();
         this.setAddTaskBtn();
     }
 
@@ -15,28 +16,13 @@ class TaskRenderer {
 
         this.containerDiv[0].appendChild(userGreetings);
     }
-
-    setAddTaskBtn() {
-        const addTaskBtn = document.createElement("button");
-        addTaskBtn.innerText = "Ajouter une tâche";
-        addTaskBtn.className = "btn btn-primary";
-        
-        const taskForm = this.loadTaskFormModal();
-        addTaskBtn.addEventListener('click', () => {
-            taskForm.style.display = 'block';
-            document.getElementById('close').addEventListener('click', () => {
-                taskForm.style.display = 'none';
-            })
-        })
-        this.containerDiv[2].insertBefore(addTaskBtn, this.appDiv);
-    }
     
     /**
      * API call
      * @returns json
      */
     async fetchAll() {
-        let res = await fetch('http://127.0.0.1:3000/todos', {
+        let res = await fetch(this.rootUrl, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -69,11 +55,6 @@ class TaskRenderer {
         }
 
         //Check type of tasks in order to know if > 1
-        /**
-         * TODO
-         * Remove singleTask controls and methods
-         * This will be separately managed in future item object
-         */
         if(Array.isArray(tasks)) {
             tasks.forEach( task => {
                 const tile = this.loadTile(task);
@@ -117,29 +98,6 @@ class TaskRenderer {
 
         return tile;
     }
-
-    loadTaskFormModal() {
-        const taskForm = document.createElement("div");
-        taskForm.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                <h2>Modal Header</h2>
-                <span id="close">&times;</span>
-                </div>
-                <div class="modal-body">
-                <p>Some text in the Modal Body</p>
-                <p>Some other text...</p>
-                </div>
-                <div class="modal-footer">
-                <h3>Modal Footer</h3>
-                </div>
-            </div>
-        `;
-        taskForm.style.display = "none";
-        this.containerDiv[2].insertBefore(taskForm, this.appDiv);
-
-        return taskForm;
-    }
     
     //Item ID page redirection
     bindShowMoreBtnEvent() {
@@ -155,6 +113,112 @@ class TaskRenderer {
                 }
             })
         })
+    }
+
+    setAddTaskBtn() {
+        const addTaskBtn = document.createElement("button");
+        addTaskBtn.innerText = "Ajouter une tâche";
+        addTaskBtn.className = "btn btn-primary";
+        
+        this.containerDiv[2].insertBefore(addTaskBtn, this.appDiv);
+
+        addTaskBtn.addEventListener('click', () => {
+            const form = this.loadTaskForm();
+            const modal = this.loadModal(form);
+            document.body.appendChild(modal);
+        })
+    }
+
+    loadModal(element) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+
+        //Preparing modal HTML skeleton with naked body
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Ajouter une tâche</h2>
+                    <span id="close" class="modal-close">&times;</span>
+                </div>
+                <div class="modal-body"></div>
+            </div>
+        `;
+
+        modal.querySelector('.modal-body').appendChild(element);
+
+        modal.querySelector('#close').addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+
+        return modal;
+    }
+
+    loadTaskForm() {
+        //Form elements creation
+        const form = document.createElement("form");
+        form.id = "task-form";
+
+        const labelName = document.createElement("label");
+        labelName.setAttribute("for", "taskname");
+        labelName.textContent = "Intitulé";
+
+        const inputName = document.createElement("input");
+        inputName.type = "text";
+        inputName.name = "taskname";
+        inputName.required = true;
+
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "submit";
+        submitBtn.className = "btn btn-success";
+        submitBtn.textContent = "Ajouter";
+
+        //Compiling form
+        form.append(labelName, inputName, submitBtn);
+
+        //Preparing auto post vars
+        let taskCount = this.handleAllTasks().length;
+
+        //Handling post
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            this.postTask(taskCount, inputName.value);
+        })
+
+        return form;
+    }
+
+    //Post JSON data through to API
+    async postTask(taskCount, inputName) {
+        const postDate = new Date();
+
+        const data = {
+            id: Number(taskCount) + 1,
+            text: inputName,
+            created_at: postDate,
+            Tags: [
+                "Test", 
+                "Post"
+            ],
+            is_complete: false
+        };
+
+        try {
+            const res = await fetch(this.rootUrl, {
+                method: "POST",
+                headers: {"Content-Type": "applicaiton/json"},
+                body: JSON.stringify(data)
+            } );
+
+            if(!res.ok)
+                throw new Error("Erreur connexion API");
+            console.log("task creation success");
+
+        } catch (error) {
+            console.error(error);
+        }
+
+        return res;
     }
 
     //Prevents HTML injections

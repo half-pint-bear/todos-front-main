@@ -11573,16 +11573,10 @@ html {
   cursor: pointer;
 }
 
-.modal-header {
+.modal-header, .modal-footer {
   padding: 2px 16px;
   background-color: rgb(44, 62, 80);
   color: white;
 }
 
 .modal-body {padding: 2px 16px;}
-
-.modal-footer {
-  padding: 2px 16px;
-  background-color: rgb(44, 62, 80);
-  color: white;
-}
