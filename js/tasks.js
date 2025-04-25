@@ -8,14 +8,17 @@ init();
 /**
  * Load page
  * @param null
+ * @returns void
  */
 async function init() {
     let allTasks = await handleAllTasks();
     renderTasks(allTasks);
 }
 
-/* API call
-* @returns json
+/** 
+* API call
+* @param null
+* @returns {JSON}
 */
 async function fetchAll() {
    let res = await fetch(rootUrl, {
@@ -33,14 +36,18 @@ async function fetchAll() {
 }
 
 /**
-* Resolving promise
-* @returns json
-*/
+ * @param null
+ * @returns {JSON}
+ */
 async function handleAllTasks() {
    return fetchAll().then(data => {return data});
 }
 
-//Display element in DOM
+/**
+ * Display element in DOM
+ * @param Array tasks
+ * @returns void
+ */
 function renderTasks(tasks) {
    appDiv.innerHTML = '';
 
@@ -61,7 +68,12 @@ function renderTasks(tasks) {
    loadAddTaskBtn();
 }
 
-//DOM Manipulation
+
+/**
+ * Prepare HTML task elements
+ * @param Array task 
+ * @returns {HTMLDivElement}
+ */
 function loadTile(task) {
    const tile = document.createElement('div');
    tile.className = 'task-tile col-lg-3';
@@ -78,7 +90,11 @@ function loadTile(task) {
    return tile;
 }
 
-//Item ID page redirection
+/**
+ * Item ID page redirection
+ * @param null
+ * @returns 
+ */
 function bindShowMoreBtnEvent() {
     const showMoreButtons = document.querySelectorAll('.btn-primary');
 
@@ -86,7 +102,7 @@ function bindShowMoreBtnEvent() {
         btn.addEventListener('click', () => {
             //JS inner Object element.dataset : access to all HTML "data-" attributes (l.38 => button data-id)
             const taskId = btn.dataset.id;
-            if(taskId) {
+            if(taskId)  {
                 //Pass taskID through to url
                 window.location.href= `./item.html?id=${taskId}`;
             }
@@ -187,7 +203,7 @@ async function postTask(taskCount, inputName) {
     try {
         const res = await fetch(rootUrl, {
             method: "POST",
-            headers: {"Content-Type": "applicaiton/json"},
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data)
         } );
 
