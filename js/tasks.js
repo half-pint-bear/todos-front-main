@@ -191,11 +191,24 @@ function loadTaskForm() {
         const label = document.createElement("label");
         label.setAttribute("for", field.name);
         label.textContent = field.label;
+        label.style.marginBottom = "0.5rem";
+        label.style.fontWeight = "bold";
 
         const input = document.createElement("input");
         input.type = "text";
         input.name = field.name;
         input.required = field.required;
+        input.style.padding = "0.5rem";
+        input.style.border = "1px solid #ccc";
+        input.style.borderRadius = "6px";
+        input.style.transition = "background-color 0.2s ease";
+
+        input.addEventListener("mouseover", () => {
+            input.style.backgroundColor = "#f9f9f9";
+        });
+        input.addEventListener("mouseout", () => {
+            input.style.backgroundColor = "white";
+        });
 
         group.append(label, input);
         form.appendChild(group);
