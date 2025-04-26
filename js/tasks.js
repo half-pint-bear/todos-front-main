@@ -13,6 +13,7 @@ async function init() {
     let allTasks = await handleAllTasks();
     renderTasks(allTasks);
     welcomeUser();
+    loadAddTaskBtn();
 }
 
 function welcomeUser() {
@@ -70,7 +71,6 @@ function renderTasks(tasks) {
    }
 
    bindShowMoreBtnEvent();
-   loadAddTaskBtn();
 }
 
 
@@ -166,22 +166,40 @@ function loadModal(element) {
 }
 
 /**
- * Create form
+ * Create & stylize form
  * @returns {HTMLFormElement}
  */
 function loadTaskForm() {
-    //Form elements creation
+    //Body
     const form = document.createElement("form");
     form.id = "task-form";
+    form.style.display = "flex";
+    form.style.flexDirection = "column";
+    form.style.gap = "1rem";
 
-    const labelName = document.createElement("label");
-    labelName.setAttribute("for", "taskname");
-    labelName.textContent = "Intitulé";
+    const fields = [
+        { label: "Libellé court :", name: "taskname", required: true},
+        { label: "Tag 1 (obligatoire)", name: "tag1", required: true },
+        { label: "Tag 2 (optionnel)", name: "tag2", required: false }
+    ]
 
-    const inputName = document.createElement("input");
-    inputName.type = "text";
-    inputName.name = "taskname";
-    inputName.required = true;
+    fields.forEach(field => {
+        const group = document.createElement("div");
+        group.style.display = "flex";
+        group.style.flexDirection = "column";
+
+        const label = document.createElement("label");
+        label.setAttribute("for", field.name);
+        label.textContent = field.label;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = field.name;
+        input.required = field.required;
+
+        group.append(label, input);
+        form.appendChild(group);
+    })
 
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
@@ -189,19 +207,27 @@ function loadTaskForm() {
     submitBtn.textContent = "Ajouter";
 
     //Compiling form
-    form.append(labelName, inputName, submitBtn);
+    form.append(submitBtn);
 
-    //Preparing auto post vars
-    let taskCount = document.getElementsByClassName('task-tile').length;
 
     //Handling post
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        postTask(taskCount, inputName.value);
-        document.querySelector(".modal").style.display = "none";
 
+        const taskCount = document.getElementsByClassName('task-tile').length;
+
+        const tags = [];
+        const tag1 = form.querySelector('[name="tag1"]').value.trim();
+        const tag2 = form.querySelector('[name="tag2"]').value.trim();
+
+        tags.push(tag1);
+        tags.push(tag2);
+
+        await postTask(taskCount, form.querySelector('[name="taskname"]').value, tags);
+        document.querySelector(".modal").remove();
+ 
         //Reload
-        await handleAllTasks();
+        renderTasks(await handleAllTasks());
     })
 
     return form;
@@ -213,17 +239,14 @@ function loadTaskForm() {
  * @param inputName
  * @returns {Promise<void>}
  */
-async function postTask(taskCount, inputName) {
+async function postTask(taskCount, inputName, tags) {
     const postDate = new Date();
 
     const data = {
         id: taskCount + 1,
         text: inputName,
         created_at: postDate,
-        Tags: [
-            "Test",
-            "Post"
-        ],
+        Tags: tags,
         is_complete: false
     };
     console.log(data);
