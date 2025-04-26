@@ -64,7 +64,7 @@ function renderTasks(tasks) {
 
    if(Array.isArray(tasks)) {
        tasks.forEach( task => {
-           const tile = this.loadTile(task);
+           const tile = loadTile(task);
            appDiv.appendChild(tile);
        });
    }
@@ -197,7 +197,11 @@ function loadTaskForm() {
     //Handling post
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        this.postTask(taskCount, inputName.value);
+        postTask(taskCount, inputName.value);
+        document.querySelector(".modal").style.display = "none";
+
+        //Reload
+        await handleAllTasks();
     })
 
     return form;
