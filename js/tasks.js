@@ -1,9 +1,10 @@
 //Global vars
 const rootUrl = 'http://localhost:3000/todos';
-const appDiv = document.getElementById("app");
+export const appDiv = document.getElementById("app");
 const containerDiv = document.getElementsByClassName("container");
 
-init();
+if(window.location.pathname.includes('tasks.html'))
+    init();
 
 /**
  * Launch
@@ -16,7 +17,7 @@ async function init() {
     loadAddTaskBtn();
 }
 
-function welcomeUser() {
+export function welcomeUser() {
     const userGreetings = document.createElement("h6");
     userGreetings.innerText = "Bonjour et bienvenue " + localStorage.getItem("username");
     userGreetings.style.color = "#FFF";
@@ -46,7 +47,7 @@ async function fetchAll() {
  * Handle promise data
  * @returns {Promise<*>}
  */
-async function handleAllTasks() {
+export async function handleAllTasks() {
    return fetchAll().then(data => {return data});
 }
 

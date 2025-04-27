@@ -1,3 +1,7 @@
+import { welcomeUser } from "./tasks.js";
+
+welcomeUser();
+
 const taskId = new URLSearchParams(window.location.search).get('id');
 const appDiv = document.getElementById('app');
 handleSingleTask(taskId);
