@@ -82,12 +82,16 @@ function loadSingleTask(task) {
         });
     }
 
-    const status = document.createElement('div');
-    status.className = 'status fw-bold';
-    status.textContent = statusText;
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn btn-danger";
+
+    const trashIcon = document.createElement("i");
+    trashIcon.className =  "fa-solid fa-trash-can";
+
+    deleteButton.appendChild(trashIcon);
 
     header.appendChild(tagsContainer);
-    header.appendChild(status);
+    header.appendChild(deleteButton);
 
     const title = document.createElement('h3');
     title.className = 'task-title mb-2';
@@ -98,25 +102,42 @@ function loadSingleTask(task) {
     const createdDate = new Date(task.created_at);
     date.textContent = `Créée le : ${createdDate.toLocaleDateString()}`;
 
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'd-flex justify-content-end';
+    const footer = document.createElement("div");
+    footer.style.display = "flex";
+    footer.style.justifyContent = "space-between";
+
+    const status = document.createElement('div');
+    status.className = 'status fw-bold';
+    status.textContent = statusText;
+
+    const statusBtnContainer = document.createElement('div');
+    statusBtnContainer.className = 'd-flex justify-content-end';
 
     const toggleButton = document.createElement('button');
     toggleButton.className = buttonClass;
+    toggleButton.classList.add("btn-toggle");
     toggleButton.textContent = buttonText;
     toggleButton.addEventListener('click', () => toggleTaskStatus(task.id));
 
-    buttonContainer.appendChild(toggleButton);
+    statusBtnContainer.appendChild(toggleButton);
+
+    footer.appendChild(statusBtnContainer);
+    footer.appendChild(status);
 
     //Build
     tile.appendChild(header);
     tile.appendChild(title);
     tile.appendChild(date);
-    tile.appendChild(buttonContainer);
+    tile.appendChild(footer);
 
     return tile;
 }
 
+/**
+ * Apply styles on status button click
+ * @param {int} taskId 
+ * @returns 
+ */
 function toggleTaskStatus(taskId) {
     const taskTile = document.querySelector(`[task-id="${taskId}"]`);
     
@@ -126,7 +147,7 @@ function toggleTaskStatus(taskId) {
     }
 
     const statusElement = taskTile.querySelector('.status');
-    const buttonElement = taskTile.querySelector('button');
+    const buttonElement = taskTile.querySelector('.btn-toggle');
 
     const isComplete = statusElement.textContent === 'Terminée';
 

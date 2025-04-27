@@ -177,6 +177,7 @@ function loadTaskForm() {
     form.style.flexDirection = "column";
     form.style.gap = "1rem";
 
+    //Form inputs
     const fields = [
         { label: "Libellé court :", name: "taskname", required: true},
         { label: "Tag 1 (obligatoire)", name: "tag1", required: true },
@@ -203,6 +204,7 @@ function loadTaskForm() {
         input.style.borderRadius = "6px";
         input.style.transition = "background-color 0.2s ease";
 
+        //Styles
         input.addEventListener("mouseover", () => {
             input.style.backgroundColor = "#f9f9f9";
         });
@@ -214,6 +216,7 @@ function loadTaskForm() {
         form.appendChild(group);
     })
 
+    //Button
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
     submitBtn.className = "btn btn-success";
