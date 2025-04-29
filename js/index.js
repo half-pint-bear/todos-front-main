@@ -1,27 +1,58 @@
 const userNameInput = document.getElementById('prenom');
 const submitButton = document.getElementById('btn-submit');
 
+//Authorized name pattern
+const VALID_NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$/;
+
+/**
+ * Prevents void submission
+ * @returns void
+ */
 const handleFormNameError = () => {
-    if (!isUserNameInputFilled()) {
-        userNameInput.classList.add('is-invalid');
-        displayErrorMessage();
+    clearErrorMessage();
+
+    const rawValue = userNameInput.value.trim();
+
+    if (!rawValue) {
+        showValidationError('Veuillez saisir un nom.');
+    } else if (!VALID_NAME_REGEX.test(rawValue)) {
+        showValidationError("Caractères spéciaux non autorisés");
     } else {
-        localStorage.setItem('username', userNameInput.value);
+        localStorage.setItem('username', rawValue);
         window.location.href = './tasks.html';
     }
 };
 
-const isUserNameInputFilled = () => {
-    return userNameInput.value.trim() !== '';
+/**
+ * Turns red in case of error
+ * @param {string} message
+ * @returns void
+ */
+const showValidationError = (message) => {
+    userNameInput.classList.add('is-invalid');
+
+    const errorSpan = document.createElement('span');
+    errorSpan.textContent = message;
+    errorSpan.style.color = 'red';
+    errorSpan.style.fontSize = '0.9rem';
+    errorSpan.classList.add('validation-error');
+
+    const formGroup = userNameInput.closest('.form-group');
+    if (formGroup && !formGroup.querySelector('.validation-error')) {
+        formGroup.appendChild(errorSpan);
+    }
 };
 
-const displayErrorMessage = () => {
-    // Prevents error message duplication
-    if (!document.querySelector('.form-group span')) {
-        const errorSpan = document.createElement('span');
-        errorSpan.textContent = 'Veuillez saisir un nom';
-        errorSpan.style.color = 'red';
-        document.querySelector('.form-group').appendChild(errorSpan);
+/**
+ * Remove error message when form is valid
+ * @returns void
+ */
+const clearErrorMessage = () => {
+    userNameInput.classList.remove('is-invalid');
+
+    const existingError = document.querySelector('.validation-error');
+    if (existingError) {
+        existingError.remove();
     }
 };
 
