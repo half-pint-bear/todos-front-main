@@ -22,7 +22,7 @@ export function welcomeUser() {
     userGreetings.innerText = "Bonjour et bienvenue " + localStorage.getItem("username");
     userGreetings.style.color = "#FFF";
 
-    containerDiv[0].appendChild(userGreetings);
+    containerDiv[1].appendChild(userGreetings);
 }
 /**
  * Call API root endpoint
@@ -171,81 +171,125 @@ function loadModal(element) {
  * @returns {HTMLFormElement}
  */
 function loadTaskForm() {
-    //Body
     const form = document.createElement("form");
     form.id = "task-form";
     form.style.display = "flex";
     form.style.flexDirection = "column";
     form.style.gap = "1rem";
 
-    //Form inputs
-    const fields = [
-        { label: "Libellé court :", name: "taskname", required: true},
-        { label: "Tag 1 (obligatoire)", name: "tag1", required: true },
-        { label: "Tag 2 (optionnel)", name: "tag2", required: false }
-    ]
+    //Task name
+    const nameGroup = document.createElement("div");
+    nameGroup.style.display = "flex";
+    nameGroup.style.flexDirection = "column";
 
-    fields.forEach(field => {
-        const group = document.createElement("div");
-        group.style.display = "flex";
-        group.style.flexDirection = "column";
+    const nameLabel = document.createElement("label");
+    nameLabel.setAttribute("for", "taskname");
+    nameLabel.textContent = "Libellé court :";
+    nameLabel.style.marginBottom = "0.5rem";
+    nameLabel.style.fontWeight = "bold";
 
-        const label = document.createElement("label");
-        label.setAttribute("for", field.name);
-        label.textContent = field.label;
-        label.style.marginBottom = "0.5rem";
-        label.style.fontWeight = "bold";
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.name = "taskname";
+    nameInput.required = true;
+    nameInput.style.padding = "0.5rem";
+    nameInput.style.border = "1px solid #ccc";
+    nameInput.style.borderRadius = "6px";
+    nameInput.style.transition = "background-color 0.2s ease";
 
-        const input = document.createElement("input");
-        input.type = "text";
-        input.name = field.name;
-        input.required = field.required;
-        input.style.padding = "0.5rem";
-        input.style.border = "1px solid #ccc";
-        input.style.borderRadius = "6px";
-        input.style.transition = "background-color 0.2s ease";
+    nameInput.addEventListener("mouseover", () => {
+        nameInput.style.backgroundColor = "#f9f9f9";
+    });
+    nameInput.addEventListener("mouseout", () => {
+        nameInput.style.backgroundColor = "white";
+    });
 
-        //Styles
-        input.addEventListener("mouseover", () => {
-            input.style.backgroundColor = "#f9f9f9";
+    nameGroup.append(nameLabel, nameInput);
+    form.appendChild(nameGroup);
+
+    //Container for dynamic tag inputs
+    const tagContainer = document.createElement("div");
+    tagContainer.id = "tag-container";
+    form.appendChild(tagContainer);
+
+    //Initial tag field (required)
+    let tagCount = 1;
+    const createTagField = (index, required = false) => {
+        const tagGroup = document.createElement("div");
+        tagGroup.style.display = "flex";
+        tagGroup.style.flexDirection = "column";
+
+        const tagLabel = document.createElement("label");
+        tagLabel.setAttribute("for", `tag${index}`);
+        tagLabel.textContent = `Tag ${index} ${index === 1 ? "(obligatoire)" : ""}`;
+        tagLabel.style.marginBottom = "0.5rem";
+        tagLabel.style.fontWeight = "bold";
+
+        const tagInput = document.createElement("input");
+        tagInput.type = "text";
+        tagInput.name = `tag${index}`;
+        tagInput.required = required;
+        tagInput.style.padding = "0.5rem";
+        tagInput.style.border = "1px solid #ccc";
+        tagInput.style.borderRadius = "6px";
+        tagInput.style.transition = "background-color 0.2s ease";
+
+        tagInput.addEventListener("mouseover", () => {
+            tagInput.style.backgroundColor = "#f9f9f9";
         });
-        input.addEventListener("mouseout", () => {
-            input.style.backgroundColor = "white";
+        tagInput.addEventListener("mouseout", () => {
+            tagInput.style.backgroundColor = "white";
         });
 
-        group.append(label, input);
-        form.appendChild(group);
-    })
+        tagGroup.append(tagLabel, tagInput);
+        return tagGroup;
+    };
 
-    //Button
+    tagContainer.appendChild(createTagField(tagCount, true));
+
+    //Add tag btn
+    const addTagBtn = document.createElement("button");
+    addTagBtn.type = "button";
+    addTagBtn.className = "btn btn-secondary";
+    addTagBtn.textContent = "Ajouter un tag";
+
+    addTagBtn.addEventListener("click", () => {
+        tagCount++;
+        tagContainer.appendChild(createTagField(tagCount));
+    });
+
+    form.appendChild(addTagBtn);
+
+    //Submit btn
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
     submitBtn.className = "btn btn-success";
     submitBtn.textContent = "Ajouter";
+    form.appendChild(submitBtn);
 
-    //Compiling form
-    form.append(submitBtn);
-
-
-    //Handling post
+    //Form submit
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const taskCount = document.getElementsByClassName('task-tile').length;
-
+        const taskCount = document.getElementsByClassName("task-tile").length;
+        const taskName = nameInput.value.trim();
         const tags = [];
-        const tag1 = form.querySelector('[name="tag1"]').value.trim();
-        const tag2 = form.querySelector('[name="tag2"]').value.trim();
 
-        tags.push(tag1);
-        tags.push(tag2);
+        // Manage tags array
+        for (let i = 1; i <= tagCount; i++) {
+            const tagInput = form.querySelector(`[name="tag${i}"]`);
+            if (tagInput && tagInput.value.trim() !== "") {
+                tags.push(tagInput.value.trim());
+            }
+        }
 
-        await postTask(taskCount, form.querySelector('[name="taskname"]').value, tags);
+        // Post & close
+        await postTask(taskCount, taskName, tags);
         document.querySelector(".modal").remove();
- 
-        //Reload
+
+        // Reload
         renderTasks(await handleAllTasks());
-    })
+    });
 
     return form;
 }
