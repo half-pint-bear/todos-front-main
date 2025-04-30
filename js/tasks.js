@@ -29,18 +29,27 @@ export function welcomeUser() {
  * @returns {Promise<*>}
  */
 async function fetchAll() {
-   let res = await fetch(rootUrl, {
-       headers: {
-           'Accept': 'application/json',
-           'Content-Type': 'application/json'
-       },
-       method: 'GET'
-   });
+    try {
+        const response = await fetch(rootUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
 
-   if(res.ok) {
-       let json = await res.json();
-       return json[0]["todolist"];
-   }
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error("Erreur API :", errText);
+            return null;
+        }
+
+        const data = await response.json();
+        return data[0]?.todolist ?? [];
+    } catch (error) {
+        console.error("Erreur de connexion à l'API :", error);
+        return null;
+    }
 }
 
 /**

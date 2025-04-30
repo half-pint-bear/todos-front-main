@@ -13,18 +13,29 @@ handleSingleTask(taskId);
  */
 
 async function fetchBytaskId(taskId) {
-    let res = await fetch(rootUrl + `/${taskId}`, {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        method: 'GET'
-    });
+    try {
+        const res = await fetch(rootUrl + `/${taskId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'GET'
+        });
 
-    if(res.ok) {
+        if (!res.ok) {
+            const errorMsg = `Erreur ${res.status} : ${res.statusText}`;
+            console.error(errorMsg);
+            alert("Impossible de récupérer la tâche demandée. Veuillez réessayer plus tard.");
+            return null;
+        }
+        
         let json = await res.json();
         console.log(json);
         return json;
+        
+    } catch (error) {
+        console.error('Erreur lors de la récupération de la tâche :', error);
+        return null;
     }
 }
 
@@ -218,54 +229,60 @@ function toggleTaskStatus(taskId) {
  * @param {int} taskId 
  * @param {string} newStatus 
  */
-function updateTaskStatus(taskId, newStatus) {
-
+async function updateTaskStatus(taskId, newStatus) {
     const data = {
         is_complete: newStatus.toLowerCase() === 'terminée'
     };
 
-    fetch(rootUrl + `/${taskId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log(`Statut de la tâche ${taskId} mis à jour avec succès`);
-        } else {
-            console.error(`Erreur lors de la mise à jour du statut de la tâche ${taskId}`);
-            response.text().then(errText => console.error('Erreur API:', errText));
+    try {
+        const response = await fetch(`${rootUrl}/${taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error(`Erreur API : ${errText}`);
+            alert(`Impossible de mettre à jour le statut de la tâche ${taskId}`);
+            return;
         }
-    })
-    .catch(error => {
-        console.error(`Erreur de connexion à l'API: ${error}`);
-    });
+
+        console.log(`Statut de la tâche ${taskId} mis à jour avec succès`);
+    } catch (error) {
+        console.error(`Erreur de connexion à l'API :`, error);
+        alert("Erreur de communication avec le serveur.");
+    }
 }
 
 /**
  * Delete task
  * @param {int} taskId 
  */
-function deleteTask(taskId) {
-    fetch(rootUrl + `/${taskId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
+async function deleteTask(taskId) {
+    try {
+        const response = await fetch(`${rootUrl}/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error(`Erreur API : ${errText}`);
+            alert(`Impossible de supprimer la tâche ${taskId}`);
+            return;
         }
-    }).then(response => {
-        if (response.ok) {
-            console.log(`Tâche ${taskId} supprimée succès`);
-            window.location.href = './tasks.html';
-        } else {
-            console.error(`Erreur lors de la suppression de la tâche ${taskId}`);
-            response.text().then(errText => console.error('Erreur API:', errText));
-        }
-    })
-    .catch(error => {
-        console.error(`Erreur de connexion à l'API: ${error}`);
-    });
+
+        console.log(`Tâche ${taskId} supprimée avec succès`);
+        window.location.href = './tasks.html';
+    } catch (error) {
+        console.error(`Erreur de connexion à l'API :`, error);
+        alert("Erreur de communication avec le serveur.");
+    }
 }
 
 /**
