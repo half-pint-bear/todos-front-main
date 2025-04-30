@@ -173,73 +173,47 @@ function loadModal(element) {
 function loadTaskForm() {
     const form = document.createElement("form");
     form.id = "task-form";
-    form.style.display = "flex";
-    form.style.flexDirection = "column";
-    form.style.gap = "1rem";
+    form.classList.add("task-form");
 
-    //Task name
+    //Task name 
     const nameGroup = document.createElement("div");
-    nameGroup.style.display = "flex";
-    nameGroup.style.flexDirection = "column";
+    nameGroup.classList.add("form-group");
 
     const nameLabel = document.createElement("label");
     nameLabel.setAttribute("for", "taskname");
     nameLabel.textContent = "Libellé court :";
-    nameLabel.style.marginBottom = "0.5rem";
-    nameLabel.style.fontWeight = "bold";
+    nameLabel.classList.add("form-label");
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.name = "taskname";
     nameInput.required = true;
-    nameInput.style.padding = "0.5rem";
-    nameInput.style.border = "1px solid #ccc";
-    nameInput.style.borderRadius = "6px";
-    nameInput.style.transition = "background-color 0.2s ease";
-
-    nameInput.addEventListener("mouseover", () => {
-        nameInput.style.backgroundColor = "#f9f9f9";
-    });
-    nameInput.addEventListener("mouseout", () => {
-        nameInput.style.backgroundColor = "white";
-    });
+    nameInput.classList.add("form-input");
 
     nameGroup.append(nameLabel, nameInput);
     form.appendChild(nameGroup);
 
-    //Container for dynamic tag inputs
+    // Tag container
     const tagContainer = document.createElement("div");
     tagContainer.id = "tag-container";
     form.appendChild(tagContainer);
 
-    //Initial tag field (required)
+    //Create tag input
     let tagCount = 1;
     const createTagField = (index, required = false) => {
         const tagGroup = document.createElement("div");
-        tagGroup.style.display = "flex";
-        tagGroup.style.flexDirection = "column";
+        tagGroup.classList.add("form-group");
 
         const tagLabel = document.createElement("label");
         tagLabel.setAttribute("for", `tag${index}`);
         tagLabel.textContent = `Tag ${index} ${index === 1 ? "(obligatoire)" : ""}`;
-        tagLabel.style.marginBottom = "0.5rem";
-        tagLabel.style.fontWeight = "bold";
+        tagLabel.classList.add("form-label");
 
         const tagInput = document.createElement("input");
         tagInput.type = "text";
         tagInput.name = `tag${index}`;
         tagInput.required = required;
-        tagInput.style.padding = "0.5rem";
-        tagInput.style.border = "1px solid #ccc";
-        tagInput.style.borderRadius = "6px";
-        tagInput.style.transition = "background-color 0.2s ease";
-
-        tagInput.addEventListener("mouseover", () => {
-            tagInput.style.backgroundColor = "#f9f9f9";
-        });
-        tagInput.addEventListener("mouseout", () => {
-            tagInput.style.backgroundColor = "white";
-        });
+        tagInput.classList.add("form-input");
 
         tagGroup.append(tagLabel, tagInput);
         return tagGroup;
@@ -247,7 +221,7 @@ function loadTaskForm() {
 
     tagContainer.appendChild(createTagField(tagCount, true));
 
-    //Add tag btn
+    //Add tag button
     const addTagBtn = document.createElement("button");
     addTagBtn.type = "button";
     addTagBtn.className = "btn btn-secondary";
@@ -260,7 +234,7 @@ function loadTaskForm() {
 
     form.appendChild(addTagBtn);
 
-    //Submit btn
+    //Submit button
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
     submitBtn.className = "btn btn-success";
@@ -275,7 +249,6 @@ function loadTaskForm() {
         const taskName = nameInput.value.trim();
         const tags = [];
 
-        // Manage tags array
         for (let i = 1; i <= tagCount; i++) {
             const tagInput = form.querySelector(`[name="tag${i}"]`);
             if (tagInput && tagInput.value.trim() !== "") {
@@ -283,11 +256,9 @@ function loadTaskForm() {
             }
         }
 
-        // Post & close
+        //Reload
         await postTask(taskCount, taskName, tags);
         document.querySelector(".modal").remove();
-
-        // Reload
         renderTasks(await handleAllTasks());
     });
 
