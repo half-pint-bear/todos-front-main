@@ -1,5 +1,5 @@
 //Global vars
-const rootUrl = 'http://localhost:3000/todos';
+export const rootUrl = 'https://totolist-navy.vercel.app/todos';
 export const appDiv = document.getElementById("app");
 const containerDiv = document.getElementsByClassName("container");
 
@@ -167,6 +167,78 @@ function loadModal(element) {
 }
 
 /**
+ * Create label element
+ * @returns {HTMLElement}
+ */
+function createNameLabel() {
+    const nameLabel = document.createElement("label");
+    nameLabel.setAttribute("for", "taskname");
+    nameLabel.textContent = "Libellé court :";
+    nameLabel.classList.add("form-label");
+
+    return nameLabel;
+}
+
+/**
+ * Create text input element
+ * @returns {HTMLElement}
+ */
+function createNameInput() {
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.name = "taskname";
+    nameInput.required = true;
+    nameInput.classList.add("form-input");
+
+    return nameInput;
+}
+
+/**
+ * Create tag input fields
+ * 1st required, other optional
+ * @param {int} tagIndex 
+ * @param {boolean} required 
+ * @returns {HTMLElement}
+ */
+function createTagField(tagIndex, required = false) {
+    const tagGroup = document.createElement("div");
+    tagGroup.classList.add("form-group");
+
+    const tagLabel = document.createElement("label");
+    tagLabel.setAttribute("for", `tag${tagIndex}`);
+    tagLabel.textContent = `Tag ${tagIndex} ${tagIndex === 1 ? "(obligatoire)" : ""}`;
+    tagLabel.classList.add("form-label");
+
+    const tagInput = document.createElement("input");
+    tagInput.type = "text";
+    tagInput.name = `tag${tagIndex}`;
+    tagInput.required = required;
+    tagInput.classList.add("form-input");
+
+    tagGroup.append(tagLabel, tagInput);
+    return tagGroup;
+}
+
+/**
+ * Create button for tag addition
+ * @param {HTMLElement} tagContainer 
+ * @returns {HTMLElement}
+ */
+function createAddTagButton(tagContainer) {
+    const addTagBtn = document.createElement("button");
+    addTagBtn.type = "button";
+    addTagBtn.className = "btn btn-secondary";
+    addTagBtn.textContent = "Ajouter une étiquette";
+
+    addTagBtn.addEventListener("click", () => {
+        const currentCount = tagContainer.querySelectorAll("input").length;
+        tagContainer.appendChild(createTagField(currentCount + 1));
+    });
+
+    return addTagBtn;
+}
+
+/**
  * Create & stylize form
  * @returns {HTMLFormElement}
  */
@@ -175,22 +247,14 @@ function loadTaskForm() {
     form.id = "task-form";
     form.classList.add("task-form");
 
-    //Task name 
+    //Task name group
     const nameGroup = document.createElement("div");
     nameGroup.classList.add("form-group");
 
-    const nameLabel = document.createElement("label");
-    nameLabel.setAttribute("for", "taskname");
-    nameLabel.textContent = "Libellé court :";
-    nameLabel.classList.add("form-label");
-
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.name = "taskname";
-    nameInput.required = true;
-    nameInput.classList.add("form-input");
-
+    const nameLabel = createNameLabel();
+    const nameInput = createNameInput();
     nameGroup.append(nameLabel, nameInput);
+
     form.appendChild(nameGroup);
 
     // Tag container
@@ -200,38 +264,8 @@ function loadTaskForm() {
 
     //Create tag input
     let tagCount = 1;
-    const createTagField = (index, required = false) => {
-        const tagGroup = document.createElement("div");
-        tagGroup.classList.add("form-group");
-
-        const tagLabel = document.createElement("label");
-        tagLabel.setAttribute("for", `tag${index}`);
-        tagLabel.textContent = `Tag ${index} ${index === 1 ? "(obligatoire)" : ""}`;
-        tagLabel.classList.add("form-label");
-
-        const tagInput = document.createElement("input");
-        tagInput.type = "text";
-        tagInput.name = `tag${index}`;
-        tagInput.required = required;
-        tagInput.classList.add("form-input");
-
-        tagGroup.append(tagLabel, tagInput);
-        return tagGroup;
-    };
-
     tagContainer.appendChild(createTagField(tagCount, true));
-
-    //Add tag button
-    const addTagBtn = document.createElement("button");
-    addTagBtn.type = "button";
-    addTagBtn.className = "btn btn-secondary";
-    addTagBtn.textContent = "Ajouter un tag";
-
-    addTagBtn.addEventListener("click", () => {
-        tagCount++;
-        tagContainer.appendChild(createTagField(tagCount));
-    });
-
+    const addTagBtn = createAddTagButton(tagContainer);
     form.appendChild(addTagBtn);
 
     //Submit button
@@ -244,25 +278,33 @@ function loadTaskForm() {
     //Form submit
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        const taskCount = document.getElementsByClassName("task-tile").length;
-        const taskName = nameInput.value.trim();
-        const tags = [];
-
-        for (let i = 1; i <= tagCount; i++) {
-            const tagInput = form.querySelector(`[name="tag${i}"]`);
-            if (tagInput && tagInput.value.trim() !== "") {
-                tags.push(tagInput.value.trim());
-            }
-        }
+        await postLogic(nameInput, tagContainer);
 
         //Reload
-        await postTask(taskCount, taskName, tags);
         document.querySelector(".modal").remove();
         renderTasks(await handleAllTasks());
     });
 
     return form;
+}
+
+/**
+ * Get post values then post them
+ * @param {HTMLElement} nameInput 
+ * @param {HTMLElement} tagContainer 
+ * @returns {void}
+ */
+async function postLogic(nameInput, tagContainer) {
+    const taskCount = document.getElementsByClassName("task-tile").length;
+    const taskName = nameInput.value.trim();
+    const tags = [];
+    const tagInputs = tagContainer.querySelectorAll("input");
+    tagInputs.forEach((input) => {
+        const value = input.value.trim();
+        if (value !== "") tags.push(value);
+    });
+
+    await postTask(taskCount, taskName, tags);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { welcomeUser } from "./tasks.js";
+import { welcomeUser, rootUrl} from "./tasks.js";
 
 welcomeUser();
 
@@ -13,7 +13,7 @@ handleSingleTask(taskId);
  */
 
 async function fetchBytaskId(taskId) {
-    let res = await fetch(`http://127.0.0.1:3000/todos/${taskId}`, {
+    let res = await fetch(rootUrl + `/${taskId}`, {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -224,7 +224,7 @@ function updateTaskStatus(taskId, newStatus) {
         is_complete: newStatus.toLowerCase() === 'terminée'
     };
 
-    fetch(`http://127.0.0.1:3000/todos/${taskId}`, {
+    fetch(rootUrl + `/${taskId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -249,7 +249,7 @@ function updateTaskStatus(taskId, newStatus) {
  * @param {int} taskId 
  */
 function deleteTask(taskId) {
-    fetch(`http://127.0.0.1:3000/todos/${taskId}`, {
+    fetch(rootUrl + `/${taskId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
